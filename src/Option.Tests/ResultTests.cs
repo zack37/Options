@@ -25,86 +25,102 @@ namespace Options.Tests
         }
 
         [Fact]
-        public void some_void_match_calls_correct_branch()
+        public void ok_void_match_calls_correct_branch()
         {
-            var some = Option.Some<object>();
-            bool someResult = false, noneResult = true; // noneResult is true to show it actually doesn't change and isn't default
+            var ok = Result<object>.Ok(new object());
+            bool okResult = false,
+                errorResult = true; // set to true to show it doesn't change and isn't default
 
-            some.Match<object>(value => someResult = true, () => noneResult = false);
-            someResult.ShouldBe(true);
-            noneResult.ShouldBe(true);
+            ok.Match(okAction: value => okResult = true, errorAction: e => errorResult = false);
+            okResult.ShouldBe(true);
+            errorResult.ShouldBe(true);
         }
 
         [Fact]
-        public void none_void_match_calls_correct_branch()
+        public void error_void_match_calls_correct_branch()
         {
-            var some = Option.None();
-            bool noneResult = false, someResult = true; // someResult is true to show it actually doesn't change and isn't default
+            var error = Result<object>.Error(new Exception("I failed"));
+            bool okResult = true, // set to true to show it doesn't change and isn't default
+                errorResult = false;
 
-            some.Match<object>(value => someResult = false, () => noneResult = true);
-            noneResult.ShouldBe(true);
-            someResult.ShouldBe(true);
+            error.Match(okAction: value => okResult = false, errorAction: e =>
+            {
+                e.Message.ShouldBe("I failed");
+                errorResult = true;
+            });
+            okResult.ShouldBe(true);
+            errorResult.ShouldBe(true);
         }
 
         [Fact]
-        public void some_none_func_match_calls_correct_some_branch()
+        public void ok_error_func_match_calls_correct_branch()
         {
-            var some = Option.Some<object>();
-            var someResult = false;
+            var ok = Result<object>.Ok(new object());
+            var okResult = false;
 
-            var noneResult = some.Match<object, bool>(someAction: value => someResult = true, noneFunc: () => true); // noneFunc returns true to show that it does not get overwritten
-            someResult.ShouldBe(true);
-            noneResult.ShouldBe(false);
+            var errorResult = ok.Match(okAction: value => okResult = true, errorFunc: e => true); // errorFunc returns true to show that it does not change from default
+            okResult.ShouldBe(true);
+            errorResult.ShouldBe(false);
         }
 
         [Fact]
-        public void none_none_func_match_calls_correct_some_branch()
+        public void error_error_func_match_calls_correct_branch()
         {
-            var none = Option.None();
-            var someResult = false;
+            var error = Result<object>.Error(new Exception("I failed"));
+            var okResult = false;
 
-            var noneResult = none.Match<object, bool>(someAction: value => someResult = true, noneFunc: () => true);
-            noneResult.ShouldBe(true);
-            someResult.ShouldBe(false);
+            var errorResult = error.Match(okAction: value => okResult = true, errorFunc: e =>
+            {
+                e.Message.ShouldBe("I failed");
+                return true;
+            });
+            okResult.ShouldBe(false);
+            errorResult.ShouldBe(true);
         }
 
         [Fact]
-        public void some_some_func_match_calls_correct_branch()
+        public void ok_ok_func_match_calls_correct_branch()
         {
-            var some = Option.Some<object>();
-            var noneResult = true;
+            var ok = Result<object>.Ok(new object());
+            var errorResult = true;
 
-            var someResult = some.Match<object, bool>(x => true, noneAction: () => noneResult = false);
-            someResult.ShouldBe(true);
-            noneResult.ShouldBe(true);
+            var okResult = ok.Match(okFunc: value => true, errorAction: e => errorResult = false);
+            errorResult.ShouldBe(true);
+            okResult.ShouldBe(true);
         }
 
         [Fact]
-        public void none_some_func_match_calls_correct_branch()
+        public void error_ok_func_match_calls_correct_branch()
         {
-            var none = Option.None();
-            var noneResult = true;
+            var error = Result<object>.Error(new Exception("I failed"));
+            var errorResult = false;
 
-            var someResult = none.Match<object, bool>(x => true, noneAction: () => noneResult = false);
-            noneResult.ShouldBe(false);
-            someResult.ShouldBe(false);
+            var okResult = error.Match(okFunc: value => true, errorAction: e =>
+            {
+                e.Message.ShouldBe("I failed");
+                errorResult = true;
+            });
+            errorResult.ShouldBe(true);
+            okResult.ShouldBe(false);
         }
 
         [Fact]
-        public void some_both_func_match_calls_correct_branch()
+        public void ok_both_func_match_calls_correct_branch()
         {
-            var some = Option.Some<object>();
-
-            var result = some.Match<object, bool>(x => true, () => false);
+            var ok = Result<object>.Ok(new object());
+            var result = ok.Match(okFunc: value => true, errorFunc: e => false);
             result.ShouldBe(true);
         }
 
         [Fact]
         public void none_both_func_match_calls_correct_branch()
         {
-            var none = Option.None();
-
-            var result = none.Match<object, bool>(x => false, () => true);
+            var error = Result<object>.Error(new Exception("I failed"));
+            var result = error.Match(okFunc: value => false, errorFunc: e =>
+            {
+                e.Message.ShouldBe("I failed");
+                return true;
+            });
             result.ShouldBe(true);
         }
     

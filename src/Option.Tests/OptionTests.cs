@@ -46,10 +46,10 @@ namespace Options.Tests
         [Fact]
         public void none_void_match_calls_correct_branch()
         {
-            var some = Option.None();
+            var none = Option.None();
             bool noneResult = false, someResult = true; // someResult is true to show it actually doesn't change and isn't default
 
-            some.Match<object>(value => someResult = false, () => noneResult = true);
+            none.Match<object>(value => someResult = false, () => noneResult = true);
             noneResult.ShouldBe(true);
             someResult.ShouldBe(true);
         }
