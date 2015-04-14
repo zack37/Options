@@ -1,4 +1,6 @@
-﻿using Shouldly;
+﻿using System;
+using System.Threading.Tasks;
+using Shouldly;
 using Xunit;
 
 namespace Options.Tests
@@ -114,6 +116,27 @@ namespace Options.Tests
 
             var result = none.Match<object, bool>(x => false, () => true);
             result.ShouldBe(true);
+        }
+
+        [Fact]
+        public void can_retrieve_value_for_some_option_type()
+        {
+            var value = new object();
+            var option = Option.Some(value);
+
+            option.Value.ShouldBeSameAs(value);
+        }
+
+        [Fact]
+        public void throws_invalid_optation_exception_when_retrieving_value_for_none_option_type()
+        {
+            Should.Throw<InvalidOperationException>(() => Task.Run(() => Option.None().Value));
+        }
+
+        [Fact]
+        public void throws_argument_exception_when_matching_a_different_type_than_created()
+        {
+            Should.Throw<ArgumentException>(() => Task.Run(() => Option.Some(new object()).Match<Guid>(value => { }, () => { })));
         }
     }
 }

@@ -8,6 +8,14 @@ namespace Options
     public struct Option
     {
         private readonly object _value;
+        public object Value {
+            get
+            {
+                if (IsNone)
+                    throw new InvalidOperationException("Cannot get value of a none Option type");
+                return _value;
+            }
+        }
         private readonly OptionType _optionType;
 
         /// <summary>
@@ -52,6 +60,7 @@ namespace Options
         }
 
         private Option(OptionType optionType, object value = null)
+            :this()
         {
             _optionType = optionType;
             _value = value;
@@ -187,8 +196,19 @@ namespace Options
 
     public struct Option<T>
     {
-        private readonly OptionType _optionType;
         private readonly T _value;
+
+        public T Value
+        {
+            get
+            {
+                if (IsNone)
+                    throw new InvalidOperationException("Cannot get value of a none Option type");
+                return _value;
+            }
+        }
+
+        private readonly OptionType _optionType;
 
         public bool IsSome { get { return _optionType == OptionType.Some; } }
 
@@ -205,6 +225,7 @@ namespace Options
         }
 
         private Option(OptionType optionType, T value = default(T))
+            :this()
         {
             _optionType = optionType;
             _value = value;
@@ -244,7 +265,7 @@ namespace Options
 
         public static explicit operator T(Option<T> option)
         {
-            return option._value;
+            return option.Value;
         }
 
         public static implicit operator Option<T>(T value)

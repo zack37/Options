@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
 
@@ -107,5 +109,19 @@ namespace Options.Tests
             result.ShouldBe(true);
         }
     
+        [Fact]
+        public void can_retrieve_value_for_some_option_type()
+        {
+            var value = new object();
+            var option = Option<object>.Some(value);
+
+            option.Value.ShouldBeSameAs(value);
+        }
+
+        [Fact]
+        public void throws_invalid_optation_exception_when_retrieving_value_for_none_option_type()
+        {
+            Should.Throw<InvalidOperationException>(() => Task.Run(() => Option<object>.None().Value));
+        }
     }
 }
