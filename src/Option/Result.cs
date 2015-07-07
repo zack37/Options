@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Options
 {
+    [DebuggerDisplay("{ToString()}")]
     public struct Result<T>
     {
         private readonly T _value;
@@ -17,6 +19,13 @@ namespace Options
         public bool IsError
         {
             get { return _resultType == ResultType.Error; }
+        }
+
+        public T Unwrap()
+        {
+            if (IsError)
+                throw new InvalidOperationException("Cannot unwrap Result type Error", _errorException);
+            return _value;
         }
 
         public static Result<T> Ok(T value)
